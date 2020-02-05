@@ -141,5 +141,9 @@ public class Controller {
 	public TicketDetails getBookingDetails(@PathVariable(value = "pnr") Long pnr)  {
 		return trainService.getBookingDetails(pnr);
 	}
+	
+	
+	
+	
 
 }
