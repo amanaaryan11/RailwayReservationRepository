@@ -19,7 +19,15 @@ public interface IAccountRepository  extends JpaRepository<AccountDetails,Long>{
 	@Query(value="UPDATE Account_Details SET BALANCE =?2 WHERE ACCOUNT_NUMBER =?1",nativeQuery = true)
 	void updateBalance(Long accountNumber, Integer amount);
 	 
-	 @Query("From AccountDetails where phoneNumber=?1 AND accountNumber=?2") 
+	
+	 @Query("From AccountDetails where phoneNumber=?1 AND accountNumber=?2")
 	List<AccountDetails> checkPhoneLinkedToAccount(Long phoneNumber, Long accountNumber);
 
-}
+		@Query("from AccountDetails where phoneNumber=?1")
+		List<AccountDetails> checkPhoneExists(Long phoneNumber);
+
+		@Query("from AccountDetails where accountNumber=?1")
+		List<AccountDetails> checkAccountExists(Long accountNumber);
+	}
+
+

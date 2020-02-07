@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.capg.beans.AccountDetails;
 import com.capg.beans.BookingDetails;
 import com.capg.beans.TicketDetails;
 import com.capg.beans.TrainDetails;
@@ -142,6 +143,12 @@ public class Controller {
 		return trainService.getBookingDetails(pnr);
 	}
 	
+	@PostMapping(path = "/irctc/user/addNewAccount")
+	public AccountDetails addNewAccountDetails(@RequestBody AccountDetails accountobj) {
+
+		return account.addNewAccountDetails(accountobj);
+
+	}
 	
 	
 	

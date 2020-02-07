@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.capg.beans.AccountDetails;
+import com.capg.beans.User;
 import com.capg.dao.IAccountRepository;
 import com.capg.dao.IUserRepoitory;
 import com.capg.exception.InsufficientBalanceException;
 import com.capg.exception.InvalidPhoneNumberException;
+import com.capg.exception.UserExistsException;
 
 @Service
 public class IAccountServiceImpl implements IAccountService {
@@ -63,5 +65,31 @@ public class IAccountServiceImpl implements IAccountService {
 		}
 		return flag;
 	}
+	
+	@Override
+	public AccountDetails addNewAccountDetails(AccountDetails accountobj) {
+		
+		List<User> Flag = userRepo.checkUserExists(accountobj.getPhoneNumber());
+		if (!Flag.isEmpty()) {
+		
+		
+		List<AccountDetails> phoneNumberFlag = accRepo.checkPhoneExists(accountobj.getPhoneNumber());
+		if (phoneNumberFlag.isEmpty()) {
 
-}
+			List<AccountDetails> accountNumberFlag = accRepo.checkAccountExists(accountobj.getAccountNumber());
+			if (accountNumberFlag.isEmpty()) {
+
+				accRepo.save(accountobj);
+			} else {
+				throw new UserExistsException("Account Number already exists");
+			}
+		} else {
+			throw new UserExistsException("Phone Number already exists");
+		}
+		}else {
+			throw new UserExistsException("Phone Number not registered");
+		}
+		return accountobj;
+
+
+}}
