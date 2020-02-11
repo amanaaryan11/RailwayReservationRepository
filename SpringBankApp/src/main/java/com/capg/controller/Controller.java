@@ -68,14 +68,17 @@ public class Controller {
 		
 		if (flag.isEmpty()) {
 
-			
+			String passwordPattern= "[A-Za-z0-9_]{5,20}";
+			if(userObj.getPassword().matches(passwordPattern)==true) {
 
 			userObj.setPassword(passwordEncoder.encode(userObj.getPassword()));
 
 			userObj.setAuthority("USER");
 
 			return trainService.registerUserDetails(userObj);
-
+			}else {
+				throw new UserNotFoundException("Password doesn't match appropriate pattern");
+			}
 			
 		} else {
 			throw new UserNotFoundException("User with phone Number Exists");
