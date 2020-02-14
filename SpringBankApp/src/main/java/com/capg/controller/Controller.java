@@ -94,13 +94,20 @@ public class Controller {
 		String password = userObj.getPassword();
 
 		User user = trainService.getUserDetails(phoneNumber);
+		try {
 		Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), password));
-
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		String jwt = tokenProvider.generateToken(authentication);
 		return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+		}catch(Exception e)
+		{
+		return ResponseEntity.ok("PLEASE ENTER CORRECT USERNAME OR PASSWORD");
+		}
+
+		
+		
 
 	}
 

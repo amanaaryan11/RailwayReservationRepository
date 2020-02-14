@@ -58,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
 				.antMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html",
 						"/**/*.css", "/**/*.js")
-				.permitAll().antMatchers("/irctc/user/registerUser","/irctc/user/validateUser/**").permitAll()
+				.permitAll().antMatchers("/irctc/user/registerUser","/irctc/user/validateUser").permitAll()
 				.antMatchers("/irctc/user/**","/irctc/admin/**").authenticated();
 
 		// Add our custom JWT security filter

@@ -65,7 +65,7 @@ public class ITrainServiceImpl implements ITrainService {
 		
 		if (userDetails == null) {
 
-			throw new UserNotFoundException("PLEASE ENTER CORRECT USERNAME AND PASSWORD");
+			throw new UserNotFoundException("PLEASE ENTER CORRECT USERNAME OR PASSWORD");
 
 		}
 		return userDetails;
