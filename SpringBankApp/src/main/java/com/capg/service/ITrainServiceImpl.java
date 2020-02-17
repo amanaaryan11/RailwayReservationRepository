@@ -2,6 +2,7 @@ package com.capg.service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,8 +52,29 @@ public class ITrainServiceImpl implements ITrainService {
 	@Override
 	public User registerUserDetails(User userObj) {
 
-		userObj.setWalletBalance(0);
-		return userRepo.save(userObj);
+		if(userObj.getAge()>18 &&  userObj.getAge()<100) {
+			if(Pattern.matches("([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})",userObj.getEmailId()))
+			{
+				if(Pattern.matches("[A-Z]{1}[a-z]{2,9}",userObj.getFirstname()))
+				{
+					if(Pattern.matches("[A-Z]{1}[a-z]{2,9}",userObj.getLastName()))
+					{
+						userObj.setWalletBalance(0);
+						return userRepo.save(userObj);
+					}else {
+						throw new UserNotFoundException("Last Name should start with capital and must be of 10 digits");
+					}	
+				}else {
+					throw new UserNotFoundException("First Name should start with capital and must be of 10 digits");
+				}
+				
+			}else {
+			throw new UserNotFoundException("Email Id should be format (abc@xyz.com)");
+			}
+		}else{
+			throw new UserNotFoundException("User Age must be greater than 18 and less than 100");
+		}
+		
 
 	}
 
@@ -74,11 +96,18 @@ public class ITrainServiceImpl implements ITrainService {
 	@Override
 	public List<User> checkUserExists(Long phoneNumber)  {
 
+		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString()))
+			
+		{
 		List<User> listFlag = userRepo.checkUserExists(phoneNumber);
 		if (!listFlag.isEmpty()) {
 			throw new UserExistsException("User Exists with phone Number");
 		}
-		return listFlag;
+		return listFlag;}
+		else {
+			throw new InvalidPhoneNumberException("Phone number must be of 10 digits");
+			
+		}
 	}
 
 	@Override

@@ -68,8 +68,8 @@ public class Controller {
 		
 		if (flag.isEmpty()) {
 
-			String passwordPattern= "[A-Za-z0-9_]{5,20}";
-			if(userObj.getPassword().matches(passwordPattern)==true) {
+			
+			if(userObj.getPassword().matches("[A-Za-z0-9_!@#$%^&*]{5,20}")) {
 
 			userObj.setPassword(passwordEncoder.encode(userObj.getPassword()));
 
@@ -77,7 +77,7 @@ public class Controller {
 
 			return trainService.registerUserDetails(userObj);
 			}else {
-				throw new UserNotFoundException("Password doesn't match appropriate pattern");
+				throw new UserNotFoundException("Password should contain characters, number and length should be in range of 5 to 20");
 			}
 			
 		} else {
