@@ -2,6 +2,7 @@ package com.capg.controller;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import com.capg.beans.BookingDetails;
 import com.capg.beans.TicketDetails;
 import com.capg.beans.TrainDetails;
 import com.capg.beans.User;
+import com.capg.exception.InvalidPhoneNumberException;
 import com.capg.exception.UserNotFoundException;
 import com.capg.service.IAccountService;
 import com.capg.service.ITrainService;
@@ -65,21 +67,21 @@ public class Controller {
 	@PostMapping(path = "/irctc/user/registerUser")
 	public User registerUserDetails(@RequestBody User userObj) {
 		List<User> flag = checkAccExists(userObj.getPhoneNumber());
-		
+
 		if (flag.isEmpty()) {
 
-			
-			if(userObj.getPassword().matches("[A-Za-z0-9_!@#$%^&*]{5,20}")) {
+			if (userObj.getPassword().matches("[A-Za-z0-9_!@#$%^&*]{5,20}")) {
 
-			userObj.setPassword(passwordEncoder.encode(userObj.getPassword()));
+				userObj.setPassword(passwordEncoder.encode(userObj.getPassword()));
 
-			userObj.setAuthority("USER");
+				userObj.setAuthority("USER");
 
-			return trainService.registerUserDetails(userObj);
-			}else {
-				throw new UserNotFoundException("Password should contain characters, number and length should be in range of 5 to 20");
+				return trainService.registerUserDetails(userObj);
+			} else {
+				throw new UserNotFoundException(
+						"Password should contain characters, number and length should be in range of 5 to 20");
 			}
-			
+
 		} else {
 			throw new UserNotFoundException("User with phone Number Exists");
 		}
@@ -87,27 +89,26 @@ public class Controller {
 	}
 
 	@PostMapping(path = "/irctc/user/validateUser")
-	public ResponseEntity<?> logIn(@RequestBody User userObj)  {
+	public ResponseEntity<?> logIn(@RequestBody User userObj) {
 
-		long phoneNumber = userObj.getPhoneNumber();
+		if (Pattern.matches("[6-9]{1}[0-9]{9}", userObj.getPhoneNumber().toString())) {
 
-		String password = userObj.getPassword();
+			String password = userObj.getPassword();
 
-		User user = trainService.getUserDetails(phoneNumber);
-		try {
-		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), password));
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+			User user = trainService.getUserDetails(userObj.getPhoneNumber());
+			try {
+				Authentication authentication = authenticationManager
+						.authenticate(new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), password));
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		String jwt = tokenProvider.generateToken(authentication);
-		return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
-		}catch(Exception e)
-		{
-		return ResponseEntity.ok("PLEASE ENTER CORRECT USERNAME OR PASSWORD");
+				String jwt = tokenProvider.generateToken(authentication);
+				return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+			} catch (Exception e) {
+				return ResponseEntity.ok("PLEASE ENTER CORRECT USERNAME OR PASSWORD");
+			}
+		} else {
+			throw new InvalidPhoneNumberException("Phone number must be of 10 digits");
 		}
-
-		
-		
 
 	}
 
@@ -119,8 +120,8 @@ public class Controller {
 	@GetMapping(path = "/irctc/user/trainList/{departureStation}/{arrivalStation}/{departureDate}")
 	public List<TrainDetails> getTrainsList(@PathVariable(value = "departureStation") String departureStation,
 			@PathVariable(value = "arrivalStation") String arrivalStation,
-			@PathVariable(value = "departureDate") Date departureDate)  {
-	
+			@PathVariable(value = "departureDate") Date departureDate) {
+
 		return trainService.getTrainsList(departureStation, arrivalStation, departureDate);
 	}
 
@@ -128,7 +129,7 @@ public class Controller {
 	public BookingDetails bookTrain(@PathVariable(value = "trainNo") Integer trainNo,
 			@PathVariable(value = "departureDate") Date departureDate,
 			@PathVariable(value = "arrivalDate") Date arrivalDate,
-			@PathVariable(value = "phoneNumber") Long phoneNumber)  {
+			@PathVariable(value = "phoneNumber") Long phoneNumber) {
 
 		return trainService.bookTrain(trainNo, departureDate, arrivalDate, phoneNumber);
 
@@ -137,7 +138,7 @@ public class Controller {
 	@PostMapping(path = "/irctc/user/addMoney/{amount}/{phoneNumber}/{accountNumber}")
 	public Boolean addMoneyToWallet(@PathVariable(value = "amount") Integer amount,
 			@PathVariable(value = "phoneNumber") Long phoneNumber,
-			@PathVariable(value = "accountNumber") Long accountNumber)  {
+			@PathVariable(value = "accountNumber") Long accountNumber) {
 		return account.addMoneyToWallet(amount, phoneNumber, accountNumber);
 
 	}
@@ -147,20 +148,16 @@ public class Controller {
 		return trainService.checkWalletBalanceExists(phoneNumber);
 	}
 
-
 	@GetMapping(path = "/irctc/user/trainList/{pnr}")
-	public TicketDetails getBookingDetails(@PathVariable(value = "pnr") Long pnr)  {
+	public TicketDetails getBookingDetails(@PathVariable(value = "pnr") Long pnr) {
 		return trainService.getBookingDetails(pnr);
 	}
-	
+
 	@PostMapping(path = "/irctc/user/addNewAccount")
 	public AccountDetails addNewAccountDetails(@RequestBody AccountDetails accountobj) {
 
 		return account.addNewAccountDetails(accountobj);
 
 	}
-	
-	
-	
 
 }

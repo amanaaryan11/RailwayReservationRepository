@@ -25,6 +25,8 @@ import com.capg.exception.UserNotFoundException;
 @Service
 public class ITrainServiceImpl implements ITrainService {
 
+	private static final String InvalidPhoneNumber = "Phone NUmber must be of 10 digits";
+
 	@Autowired
 	IRegisterRepository userRepo;
 
@@ -105,7 +107,7 @@ public class ITrainServiceImpl implements ITrainService {
 		}
 		return listFlag;}
 		else {
-			throw new InvalidPhoneNumberException("Phone number must be of 10 digits");
+			throw new InvalidPhoneNumberException(InvalidPhoneNumber);
 			
 		}
 	}
@@ -145,7 +147,9 @@ public class ITrainServiceImpl implements ITrainService {
 		int trainId = trainRepo.findTrainId(trainNo, departureDate, arrivalDate);
 
 		int fare = trainRepo.findFareById(trainId);
-
+		
+		
+		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
 		List<User> listFlag = userRepo.checkUserExists(phoneNumber);
 		if (!listFlag.isEmpty()) {
 
@@ -165,7 +169,10 @@ public class ITrainServiceImpl implements ITrainService {
 				return bookRepo.save(book);
 			} 
 		} else {
-			throw new UserExistsException("Phone Number doesnt exists");
+			throw new InvalidPhoneNumberException("Phone Number doesnt exists");
+		}}
+		else {
+			throw new InvalidPhoneNumberException(InvalidPhoneNumber);
 		}
 		return null;
 	}
@@ -216,6 +223,7 @@ public class ITrainServiceImpl implements ITrainService {
 	@Override
 	public Integer checkWalletBalanceExists(Long phoneNumber)  {
 
+		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
 		Integer balance = userRepo.findWalletbalance(phoneNumber);
 		
 
@@ -224,5 +232,9 @@ public class ITrainServiceImpl implements ITrainService {
 		}
 		return balance;
 	}
+	else
+	{
+		throw new InvalidPhoneNumberException(InvalidPhoneNumber);
+	}
 
-}
+}}
