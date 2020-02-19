@@ -54,39 +54,36 @@ public class ITrainServiceImpl implements ITrainService {
 	@Override
 	public User registerUserDetails(User userObj) {
 
-		if(userObj.getAge()>18 &&  userObj.getAge()<100) {
-			if(Pattern.matches("([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})",userObj.getEmailId()))
-			{
-				if(Pattern.matches("[A-Z]{1}[a-z]{2,9}",userObj.getFirstname()))
-				{
-					if(Pattern.matches("[A-Z]{1}[a-z]{2,9}",userObj.getLastName()))
-					{
+		if (userObj.getAge() > 18 && userObj.getAge() < 100) {
+			if (Pattern.matches("([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})",
+					userObj.getEmailId())) {
+				if (Pattern.matches("[A-Z]{1}[a-z]{2,9}", userObj.getFirstname())) {
+					if (Pattern.matches("[A-Z]{1}[a-z]{2,9}", userObj.getLastName())) {
 						userObj.setWalletBalance(0);
 						return userRepo.save(userObj);
-					}else {
+					} else {
 						throw new UserNotFoundException("Last Name should start with capital and must be of 10 digits");
-					}	
-				}else {
+					}
+				} else {
 					throw new UserNotFoundException("First Name should start with capital and must be of 10 digits");
 				}
-				
-			}else {
-			throw new UserNotFoundException("Email Id should be format (abc@xyz.com)");
+
+			} else {
+				throw new UserNotFoundException("Email Id should be format (abc@xyz.com)");
 			}
-		}else{
+		} else {
 			throw new UserNotFoundException("User Age must be greater than 18 and less than 100");
 		}
-		
 
 	}
 
 	@Override
-	public User getUserDetails(Long phoneNumber)  {
+	public User getUserDetails(Long phoneNumber) {
 
 		User userDetails;
 
 		userDetails = userRepo.getUserDetails(phoneNumber);
-		
+
 		if (userDetails == null) {
 
 			throw new UserNotFoundException("PLEASE ENTER CORRECT USERNAME OR PASSWORD");
@@ -96,25 +93,24 @@ public class ITrainServiceImpl implements ITrainService {
 	}
 
 	@Override
-	public List<User> checkUserExists(Long phoneNumber)  {
+	public List<User> checkUserExists(Long phoneNumber) {
 
-		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString()))
-			
+		if (Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString()))
+
 		{
-		List<User> listFlag = userRepo.checkUserExists(phoneNumber);
-		if (!listFlag.isEmpty()) {
-			throw new UserExistsException("User Exists with phone Number");
-		}
-		return listFlag;}
-		else {
+			List<User> listFlag = userRepo.checkUserExists(phoneNumber);
+			if (!listFlag.isEmpty()) {
+				throw new UserExistsException("User Exists with phone Number");
+			}
+			return listFlag;
+		} else {
 			throw new InvalidPhoneNumberException(InvalidPhoneNumber);
-			
+
 		}
 	}
 
 	@Override
-	public List<TrainDetails> getTrainsList(String departureStation, String arrivalStation, Date departureDate)
-			 {
+	public List<TrainDetails> getTrainsList(String departureStation, String arrivalStation, Date departureDate) {
 		List<TrainDetails> list;
 
 		list = trainRepo.findTrainDetails(departureStation, arrivalStation, departureDate);
@@ -129,8 +125,7 @@ public class ITrainServiceImpl implements ITrainService {
 
 //Exception handling done
 	@Override
-	public BookingDetails bookTrain(Integer trainNo, Date departureDate, Date arrivalDate, Long phoneNumber)
-			 {
+	public BookingDetails bookTrain(Integer trainNo, Date departureDate, Date arrivalDate, Long phoneNumber) {
 
 		int seats;
 		try {
@@ -147,31 +142,28 @@ public class ITrainServiceImpl implements ITrainService {
 		int trainId = trainRepo.findTrainId(trainNo, departureDate, arrivalDate);
 
 		int fare = trainRepo.findFareById(trainId);
-		
-		
-		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
-		List<User> listFlag = userRepo.checkUserExists(phoneNumber);
-		if (!listFlag.isEmpty()) {
 
-			boolean flag
-			 = accService.completePayment(fare, phoneNumber);
-			
-			
-			if (flag) {
-				seats--;
+		if (Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
+			List<User> listFlag = userRepo.checkUserExists(phoneNumber);
+			if (!listFlag.isEmpty()) {
 
-				trainRepo.seatUpdate(trainNo, departureDate, arrivalDate, seats);
+				boolean flag = accService.completePayment(fare, phoneNumber);
 
-				BookingDetails book = new BookingDetails();
-				book.setPhoneNumber(phoneNumber);
-				book.setTrainId(trainId);
+				if (flag) {
+					seats--;
 
-				return bookRepo.save(book);
-			} 
+					trainRepo.seatUpdate(trainNo, departureDate, arrivalDate, seats);
+
+					BookingDetails book = new BookingDetails();
+					book.setPhoneNumber(phoneNumber);
+					book.setTrainId(trainId);
+
+					return bookRepo.save(book);
+				}
+			} else {
+				throw new InvalidPhoneNumberException("Phone Number doesnt exists");
+			}
 		} else {
-			throw new InvalidPhoneNumberException("Phone Number doesnt exists");
-		}}
-		else {
 			throw new InvalidPhoneNumberException(InvalidPhoneNumber);
 		}
 		return null;
@@ -180,61 +172,55 @@ public class ITrainServiceImpl implements ITrainService {
 	// DONE EXCEPTION HANDLING
 
 	@Override
-	public TicketDetails getBookingDetails(Long pnr)  {
+	public TicketDetails getBookingDetails(Long pnr) {
 
-		TicketDetails ticketdetails=new TicketDetails();
+		TicketDetails ticketdetails = new TicketDetails();
 		Integer trainId;
 		Long phoneNumber;
 
 		trainId = bookRepo.findTrainIdByPnr(pnr);
-		
 
-		if (trainId == null)
-			throw new InvalidPnrException("PLEASE CHECK YOUR PNR NO");
+		if (trainId == null) {
+			throw new InvalidPnrException("PLEASE CHECK YOUR PNR NO ..");
+		} else {
+			phoneNumber = bookRepo.findPhoneNumberByPnr(pnr);
 
-		phoneNumber = bookRepo.findPhoneNumberByPnr(pnr);
+			List<User> user = userRepo.checkUserExists(phoneNumber);
+			if (!user.isEmpty()) {
 
-		
-		List<User> user=userRepo.checkUserExists(phoneNumber);
-		if(!user.isEmpty()) {
-		
-		TrainDetails details= trainRepo.findByTrainId(trainId);
-		ticketdetails.setFirstName(user.get(0).getFirstname());
-		ticketdetails.setLastName(user.get(0).getLastName());
-		ticketdetails.setArrivalDate(details.getArrivalDate());
-		ticketdetails.setArrivalStation(details.getArrivalStation());
-		ticketdetails.setArrivalTime(details.getArrivalTime());
-		ticketdetails.setDeparturedate(details.getDeparturedate());
-		ticketdetails.setDepartureStation(details.getDepartureStation());
-		ticketdetails.setDepartureTime(details.getDepartureTime());
-		ticketdetails.setFare(details.getFare());
-		ticketdetails.setTrainNo(details.getTrainNo());
-		ticketdetails.setTrainname(details.getTrainname());
-		
-	
-		
-		
-		return ticketdetails;
+				TrainDetails details = trainRepo.findByTrainId(trainId);
+				ticketdetails.setFirstName(user.get(0).getFirstname());
+				ticketdetails.setLastName(user.get(0).getLastName());
+				ticketdetails.setArrivalDate(details.getArrivalDate());
+				ticketdetails.setArrivalStation(details.getArrivalStation());
+				ticketdetails.setArrivalTime(details.getArrivalTime());
+				ticketdetails.setDeparturedate(details.getDeparturedate());
+				ticketdetails.setDepartureStation(details.getDepartureStation());
+				ticketdetails.setDepartureTime(details.getDepartureTime());
+				ticketdetails.setFare(details.getFare());
+				ticketdetails.setTrainNo(details.getTrainNo());
+				ticketdetails.setTrainname(details.getTrainname());
+
+				return ticketdetails;
+			} else {
+				throw new InvalidPhoneNumberException("Invalid Phone Number");
+			}
 		}
-		else
-			throw new InvalidPhoneNumberException("Invalid Phone Number");
 	}
 
 	@Override
-	public Integer checkWalletBalanceExists(Long phoneNumber)  {
+	public Integer checkWalletBalanceExists(Long phoneNumber) {
 
-		if(Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
-		Integer balance = userRepo.findWalletbalance(phoneNumber);
-		
+		if (Pattern.matches("[6-9]{1}[0-9]{9}", phoneNumber.toString())) {
+			Integer balance = userRepo.findWalletbalance(phoneNumber);
 
-		if (balance == null) {
-			throw new InvalidPhoneNumberException("Phone number doesn't exists");
+			if (balance == null) {
+				throw new InvalidPhoneNumberException("Phone number doesn't exists");
+			}
+			return balance;
+		} else {
+			throw new InvalidPhoneNumberException(InvalidPhoneNumber);
 		}
-		return balance;
-	}
-	else
-	{
-		throw new InvalidPhoneNumberException(InvalidPhoneNumber);
-	}
 
-}}
+	}
+}

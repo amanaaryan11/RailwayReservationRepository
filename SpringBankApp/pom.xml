@@ -44,6 +44,12 @@
 			<scope>test</scope>
 		</dependency>
 		
+		<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-logging</artifactId>
+</dependency>
+		
+		
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 <dependency>
     <groupId>org.projectlombok</groupId>
@@ -65,12 +71,7 @@
 			<version>2.9.1</version>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/org.springframework/spring-aop -->
-<dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-aop</artifactId>
-    <version>5.2.3.RELEASE</version>
-</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -80,6 +81,32 @@
 			<artifactId>jjwt</artifactId>
 			<version>${jjwt.version}</version>
 		</dependency>
+
+
+<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-log4j2</artifactId>
+    <version>2.2.2.RELEASE</version>
+</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-aop -->
+ 
+
+
+<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+    <version>2.2.4.RELEASE</version>
+</dependency>
+
+
+<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
+
+
+
+
 
 	</dependencies>
 
